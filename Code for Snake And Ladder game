@@ -1,0 +1,58 @@
+def snake_ladder_game(board, die_inputs):
+    n = len(board)
+    m = len(board[0])
+    start = (n - 1, 0)  # Starting position
+    end = (0, 0)  # Ending position
+
+    def is_valid(x, y):
+        return 0 <= x < n and 0 <= y < m
+
+    visited = [[False for _ in range(m)] for _ in range(n)]
+
+    def dfs(x, y, snakes, ladders):
+        visited[x][y] = True
+        if (x, y) == end:
+            return True, snakes, ladders
+
+        possible_moves = []
+        for d in die_inputs:
+            if x % 2 == 0:
+                new_x = x
+                new_y = y + d
+            else:
+                new_x = x
+                new_y = y - d
+
+            if is_valid(new_x, new_y) and not visited[new_x][new_y]:
+                if board[new_x][new_y].startswith("S"):
+                    snake_pos = int(board[new_x][new_y][2:-1])
+                    snakes += 1
+                    success, snakes, ladders = dfs(n - snake_pos, (m - 1) - (snake_pos % m), snakes, ladders)
+                    if success:
+                        return True, snakes, ladders
+                elif board[new_x][new_y].startswith("L"):
+                    ladder_pos = int(board[new_x][new_y][2:-1])
+                    ladders += 1
+                    success, snakes, ladders = dfs(n - ladder_pos, (m - 1) - (ladder_pos % m), snakes, ladders)
+                    if success:
+                        return True, snakes, ladders
+                else:
+                    success, snakes, ladders = dfs(new_x, new_y, snakes, ladders)
+                    if success:
+                        return True, snakes, ladders
+        return False, snakes, ladders
+
+    success, snakes, ladders = dfs(start[0], start[1], 0, 0)
+
+    if success:
+        return f"Possible {snakes} {ladders}"
+    else:
+        return f"Not possible {snakes} {ladders} {n - end[0]}"
+
+# Read input
+board = [input().split() for _ in range(10)]
+die_inputs = list(map(int, input().split()))
+
+# Call the game function
+result = snake_ladder_game(board, die_inputs)
+print(result)
